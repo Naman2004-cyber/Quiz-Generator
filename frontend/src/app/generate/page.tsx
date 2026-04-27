@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Zap, BrainCircuit, Activity, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { getQuizHistory } from "@/lib/storage";
+
 const GENERATION_STEPS = [
   "Initializing learning matrix...",
   "Scanning optimal conceptual trees...",
@@ -40,16 +42,7 @@ export default function GenerateQuiz() {
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        const storedHistory = localStorage.getItem("aura_quiz_history") || localStorage.getItem("quiz_results");
-        let history = [];
-        if (storedHistory) {
-          history = JSON.parse(storedHistory);
-          // Standardize history if it's the old single object format
-          if (!Array.isArray(history) && history.quiz) {
-             history = [history.quiz];
-          }
-        }
-        
+        const history = getQuizHistory();
         if (history.length > 0) {
           const res = await fetch("http://127.0.0.1:8000/api/next-quiz", {
             method: "POST",

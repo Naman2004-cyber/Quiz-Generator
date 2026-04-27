@@ -7,6 +7,7 @@
 // ── Types ──────────────────────────────────────────
 
 export interface QuizResult {
+  userId: string;
   id: string;
   topic: string;
   title: string;
@@ -75,6 +76,7 @@ let _currentUserId: string | null = null;
  */
 export function setCurrentUserId(uid: string | null) {
   _currentUserId = uid;
+  emitStorageUpdate(); // Notify components to reload data with new user context
 }
 
 export function getCurrentUserId(): string | null {
@@ -145,11 +147,13 @@ export function onStorageUpdate(callback: () => void): () => void {
 export async function syncHistoryFromDB() {
   if (typeof window === "undefined") return;
   try {
+    if (!_currentUserId) return;
+
     // Read local history before overwriting
     const rawLocal = localStorage.getItem(KEYS.QUIZ_HISTORY);
     const localHistory: QuizResult[] = rawLocal ? JSON.parse(rawLocal) : [];
 
-    const res = await fetch("http://127.0.0.1:8000/api/history");
+    const res = await fetch(`http://127.0.0.1:8000/api/history?user_id=${_currentUserId}`);
     if (res.ok) {
       let dbData = await res.json();
       
@@ -160,11 +164,11 @@ export async function syncHistoryFromDB() {
           await fetch("http://127.0.0.1:8000/api/quizzes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(quiz)
+            body: JSON.stringify({ ...quiz, userId: _currentUserId })
           });
         }
         // Fetch again to get the canonical DB state after migration
-        const updatedRes = await fetch("http://127.0.0.1:8000/api/history");
+        const updatedRes = await fetch(`http://127.0.0.1:8000/api/history?user_id=${_currentUserId}`);
         if (updatedRes.ok) {
           dbData = await updatedRes.json();
         }
@@ -181,18 +185,27 @@ export async function syncHistoryFromDB() {
 
 export function getQuizHistory(): QuizResult[] {
   if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(KEYS.QUIZ_HISTORY);
+  if (!raw) return [];
   try {
-    const raw = localStorage.getItem(KEYS.QUIZ_HISTORY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    let history: QuizResult[] = JSON.parse(raw);
+    // Ensure every record has a userId (important for API compatibility)
+    history = history.map(item => ({
+      ...item,
+      userId: item.userId || _currentUserId || "guest"
+    }));
+    // Ensure chronological order (newest first)
+    return history.sort((a, b) => b.timestamp - a.timestamp);
+  } catch (e) {
     return [];
   }
 }
 
-export function saveQuizResult(result: Omit<QuizResult, "id">): QuizResult {
+export function saveQuizResult(result: Omit<QuizResult, "id" | "userId">): QuizResult {
   const history = getQuizHistory();
   const entry: QuizResult = {
     ...result,
+    userId: _currentUserId || "guest",
     id: `quiz_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
   };
   history.unshift(entry); // newest first
@@ -762,6 +775,7 @@ export function seedDemoData() {
 
     history.push({
       id: `demo_${i}_${Math.random().toString(36).slice(2, 8)}`,
+      userId: _currentUserId || "demo",
       topic: topics[topicIdx],
       title: `${topics[topicIdx]} Assessment ${i + 1}`,
       score,

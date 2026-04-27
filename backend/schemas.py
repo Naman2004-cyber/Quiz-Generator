@@ -6,6 +6,7 @@ class ConceptResult(BaseModel):
     correct: bool
 
 class QuizRecord(BaseModel):
+    userId: str
     id: str
     topic: str
     title: str

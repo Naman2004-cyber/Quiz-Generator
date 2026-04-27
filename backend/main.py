@@ -68,37 +68,48 @@ def health_check():
 
 @app.post("/api/quizzes", response_model=QuizRecord)
 def save_quiz_result(quiz: QuizRecord, db: Session = Depends(get_db)):
-    db_quiz = QuizResultDB(
-        id=quiz.id,
-        topic=quiz.topic,
-        title=quiz.title,
-        score=quiz.score,
-        total_questions=quiz.totalQuestions,
-        correct_answers=quiz.correctAnswers,
-        difficulty=quiz.difficulty,
-        question_type=quiz.questionType,
-        time_spent_seconds=quiz.timeSpentSeconds,
-        timestamp=quiz.timestamp,
-        concepts=quiz.concepts,
-        concept_results=[c.model_dump() for c in quiz.conceptResults],
-        analysis=quiz.analysis,
-        hints_used=quiz.hintsUsed,
-        hints_per_question=quiz.hintsPerQuestion,
-        answer_changes=quiz.answerChanges,
-        avg_time_per_question_sec=quiz.avgTimePerQuestionSec,
-        per_question_data=quiz.perQuestionData
-    )
-    db.add(db_quiz)
-    db.commit()
-    db.refresh(db_quiz)
+    try:
+        db_quiz = QuizResultDB(
+            id=quiz.id,
+            user_id=quiz.userId,
+            topic=quiz.topic,
+            title=quiz.title,
+            score=quiz.score,
+            total_questions=quiz.totalQuestions,
+            correct_answers=quiz.correctAnswers,
+            difficulty=quiz.difficulty,
+            question_type=quiz.questionType,
+            time_spent_seconds=quiz.timeSpentSeconds,
+            timestamp=quiz.timestamp,
+            concepts=quiz.concepts,
+            concept_results=[c.model_dump() for c in quiz.conceptResults],
+            analysis=quiz.analysis,
+            hints_used=quiz.hintsUsed,
+            hints_per_question=quiz.hintsPerQuestion,
+            answer_changes=quiz.answerChanges,
+            avg_time_per_question_sec=quiz.avgTimePerQuestionSec,
+            per_question_data=quiz.perQuestionData
+        )
+        db.add(db_quiz)
+        db.commit()
+        db.refresh(db_quiz)
+    except Exception as e:
+        db.rollback()
+        # If it's a duplicate key, we just return the input quiz
+        if "UniqueViolation" in str(e) or "duplicate key" in str(e).lower():
+            logger.info(f"Quiz {quiz.id} already exists. Skipping.")
+        else:
+            logger.error(f"Error saving quiz: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
     return quiz
 
 @app.get("/api/history", response_model=List[QuizRecord])
-def get_quiz_history(db: Session = Depends(get_db)):
-    db_quizzes = db.query(QuizResultDB).order_by(QuizResultDB.timestamp.desc()).all()
+def get_quiz_history(user_id: str, db: Session = Depends(get_db)):
+    db_quizzes = db.query(QuizResultDB).filter(QuizResultDB.user_id == user_id).order_by(QuizResultDB.timestamp.desc()).all()
     results = []
     for q in db_quizzes:
         results.append(QuizRecord(
+            userId=q.user_id,
             id=q.id,
             topic=q.topic,
             title=q.title,
