@@ -753,3 +753,74 @@ select.input-field option {
   .main-content { padding: 20px 16px; }
   .heading-lg { font-size: 1.6rem; }
 }
+/* ══════════════════════════════════════════
+   CUSTOM SELECT
+   ══════════════════════════════════════════ */
+
+.custom-select-container {
+  position: relative;
+  width: 100%;
+}
+.custom-select-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text-main);
+}
+.custom-select-trigger {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9rem;
+}
+.custom-select-trigger:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(124, 106, 255, 0.3);
+}
+.custom-select-trigger.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 106, 255, 0.1);
+}
+.custom-select-trigger .placeholder {
+  color: var(--text-dim);
+}
+.custom-select-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: #12122b;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  list-style: none;
+  z-index: 100;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.custom-select-option {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.custom-select-option:hover {
+  background: var(--bg-surface-3);
+  color: var(--text-main);
+}
+.custom-select-option.selected {
+  background: var(--primary-glow);
+  color: var(--primary);
+  font-weight: 600;
+}

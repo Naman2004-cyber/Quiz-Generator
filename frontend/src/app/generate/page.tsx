@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { getQuizHistory, setCurrentQuiz } from "@/lib/storage";
 import { BACKEND_URL } from "@/lib/config";
+import CustomSelect from "@/components/CustomSelect";
 
 const GENERATION_STEPS = [
   "Initializing learning matrix...",
@@ -151,46 +152,40 @@ export default function GenerateQuiz() {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="heading-sm mb-2" style={{ display: "block", fontSize: "0.85rem", marginBottom: "10px" }}>Difficulty</label>
-            <select
-              className="input-field"
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-            >
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-          </div>
-          <div>
-            <label className="heading-sm mb-2" style={{ display: "block", fontSize: "0.85rem", marginBottom: "10px" }}>Question Count</label>
-            <select
-              className="input-field"
-              value={numQuestions}
-              onChange={(e) => setNumQuestions(Number(e.target.value))}
-            >
-              <option value={3}>3 Questions</option>
-              <option value={5}>5 Questions</option>
-              <option value={10}>10 Questions</option>
-              <option value={20}>20 Questions</option>
-              <option value={30}>30 Questions</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Difficulty"
+            value={difficulty}
+            onChange={setDifficulty}
+            options={[
+              { label: "Easy", value: "Easy" },
+              { label: "Medium", value: "Medium" },
+              { label: "Hard", value: "Hard" }
+            ]}
+          />
+          <CustomSelect
+            label="Question Count"
+            value={numQuestions}
+            onChange={setNumQuestions}
+            options={[
+              { label: "3 Questions", value: 3 },
+              { label: "5 Questions", value: 5 },
+              { label: "10 Questions", value: 10 },
+              { label: "20 Questions", value: 20 },
+              { label: "30 Questions", value: 30 }
+            ]}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="heading-sm mb-2" style={{ display: "block", fontSize: "0.85rem", marginBottom: "10px" }}>Format</label>
-            <select
-              className="input-field"
-              value={questionType}
-              onChange={(e) => setQuestionType(e.target.value)}
-            >
-              <option value="Multiple Choice">Multiple Choice</option>
-              <option value="True/False">True / False</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Format"
+            value={questionType}
+            onChange={setQuestionType}
+            options={[
+              { label: "Multiple Choice", value: "Multiple Choice" },
+              { label: "True / False", value: "True/False" }
+            ]}
+          />
         </div>
 
         <div>

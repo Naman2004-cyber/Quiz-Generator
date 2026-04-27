@@ -473,23 +473,11 @@
   display: flex;
   gap: 16px;
   margin-top: 16px;
-  align-items: center;
+  align-items: flex-end;
 }
 
-.zpd-select {
-  padding: 10px 16px;
-  background: var(--bg-surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  color: var(--text-main);
-  font-size: 0.9rem;
+.zpd-controls > div {
   flex: 1;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.zpd-select:focus {
-  border-color: var(--primary);
 }
 
 .zpd-button {

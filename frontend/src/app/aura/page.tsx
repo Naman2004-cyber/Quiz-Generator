@@ -7,6 +7,7 @@ import { Flame, Brain, Activity, Zap, TrendingUp, TrendingDown, Target, HelpCirc
 import { motion } from "framer-motion";
 import { BACKEND_URL } from "@/lib/config";
 import "./aura.css";
+import CustomSelect from "@/components/CustomSelect";
 
 interface MLAnalysis {
   concept_mastery: Record<string, number>;
@@ -329,17 +330,15 @@ export default function AuraJourney() {
         </p>
         
         <div className="zpd-controls">
-          <select 
-            className="zpd-select" 
-            value={zpdTopic} 
-            onChange={(e) => setZpdTopic(e.target.value)}
-            disabled={isSimulating}
-          >
-            {Object.keys(topicMap).length === 0 && <option value="">No Topics Available</option>}
-            {Object.keys(topicMap).map(topic => (
-              <option key={topic} value={topic}>{topic}</option>
-            ))}
-          </select>
+          <CustomSelect
+            value={zpdTopic}
+            onChange={setZpdTopic}
+            options={Object.keys(topicMap).length === 0 
+              ? [{ label: "No Topics Available", value: "" }]
+              : Object.keys(topicMap).map(topic => ({ label: topic, value: topic }))
+            }
+            placeholder="Select a topic"
+          />
           <button 
             className="zpd-button" 
             onClick={() => {
