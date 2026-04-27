@@ -1,0 +1,60 @@
+# === Frontend (Next.js) ===
+
+# dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# next.js
+frontend/.next/
+frontend/out/
+
+# production
+frontend/build
+
+# typescript
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# misc
+frontend/lint.txt
+
+# === Backend (Python) ===
+
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/data/
+backend/models/
+
+# === Shared / Global ===
+
+# env files
+.env*
+frontend/.env*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# keys
+*.pem
+
+# vercel
+.vercel

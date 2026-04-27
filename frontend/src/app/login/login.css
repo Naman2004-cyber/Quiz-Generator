@@ -1,0 +1,31 @@
+/* Login page styles — reuses signup CSS */
+@import "../signup/signup.css";
+
+/* Login-specific overrides (if any) */
+.login-page {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  background: var(--su-bg-dark);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(124, 106, 255, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(91, 74, 207, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 60% 80%, rgba(0, 212, 170, 0.04) 0%, transparent 50%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-error-banner {
+  padding: 12px 14px;
+  background: rgba(251, 113, 133, 0.06);
+  border: 1px solid rgba(251, 113, 133, 0.12);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--su-danger);
+  font-weight: 500;
+}
