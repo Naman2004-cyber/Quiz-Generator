@@ -1,6 +1,6 @@
 .aura-container {
-  padding: 24px 32px;
-  max-width: 1200px;
+  padding: 32px 44px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 
@@ -12,9 +12,10 @@
   height: 60vh;
   text-align: center;
   background: var(--bg-surface-1);
+  backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  gap: 16px;
+  border-radius: var(--radius-xl);
+  gap: 20px;
 }
 
 .aura-empty h2 {
@@ -31,18 +32,73 @@
 .aura-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+/* Tabs Navigation */
+.aura-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-surface-1);
+  padding: 6px;
+  border-radius: var(--radius-lg);
   margin-bottom: 32px;
+  border: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.aura-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.aura-tab-btn:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-main);
+}
+
+.aura-tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 20px var(--primary-glow);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.aura-tab-btn svg {
+  opacity: 0.7;
+}
+
+.aura-tab-btn.active svg {
+  opacity: 1;
 }
 
 .aura-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--text-main);
-  background: linear-gradient(135deg, var(--text-main) 0%, rgba(255,255,255,0.7) 100%);
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .aura-subtitle {
@@ -53,12 +109,31 @@
 .aura-score-badge {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 12px 24px;
-  border-radius: 50px;
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
+  gap: 16px;
+  background: var(--bg-surface-1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  padding: 8px 24px 8px 12px;
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.08);
+  transition: all 0.3s ease;
+}
+
+.aura-score-badge:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
+  background: var(--bg-surface-2);
+}
+
+.aura-score-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(245, 158, 11, 0.15);
 }
 
 .aura-score-content {
@@ -74,10 +149,11 @@
 }
 
 .aura-score-value {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 900;
   color: #fff;
   line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .aura-grid {
@@ -89,12 +165,15 @@
 
 .aura-panel {
   background: var(--bg-surface-1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: var(--radius-xl);
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.2);
 }
 
 .aura-panel-header {
@@ -187,21 +266,23 @@
 }
 
 .aura-metric-card {
-  background: rgba(0,0,0,0.2);
+  background: var(--bg-surface-1);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: var(--radius-lg);
+  padding: 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
-  transition: transform 0.2s ease;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .aura-metric-card:hover {
-  transform: translateY(-2px);
-  background: rgba(0,0,0,0.3);
+  transform: translateY(-4px);
+  background: var(--bg-surface-2);
+  border-color: var(--primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .aura-metric-val {
@@ -229,15 +310,59 @@
   min-height: 400px;
 }
 
+.skill-tree-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.skill-filter-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-surface-2);
+  padding: 4px;
+  border-radius: 50px;
+  border: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.skill-filter-btn {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.skill-filter-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-surface-3);
+}
+
+.skill-filter-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 10px var(--primary-glow);
+}
+
 .skill-tree-container {
   position: relative;
   width: 100%;
-  min-height: 350px;
-  background: radial-gradient(circle at center, rgba(108, 99, 255, 0.05) 0%, transparent 70%);
-  border-radius: 12px;
+  min-height: 380px;
+  background: radial-gradient(circle at center, rgba(124, 106, 255, 0.08) 0%, transparent 70%);
+  border-radius: var(--radius-xl);
   overflow-x: auto;
   overflow-y: hidden;
-  border: 1px dashed var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
 }
 
 .skill-tree-viewport {
@@ -468,18 +593,18 @@
 }
 
 .zpd-prediction-card {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-surface-1);
   border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: var(--radius-lg);
+  padding: 24px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zpd-prediction-card.optimal {
   border-color: var(--primary);
-  background: rgba(108, 99, 255, 0.08);
-  box-shadow: 0 0 20px rgba(108, 99, 255, 0.15);
+  background: var(--primary-glow);
+  box-shadow: 0 0 32px var(--primary-glow), inset 0 0 0 1px rgba(124, 106, 255, 0.1);
 }
 
 .zpd-prediction-header {
@@ -639,52 +764,56 @@
 .deep-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 16px;
+  gap: 16px;
+  margin-top: 24px;
 }
-@media (max-width: 900px) { .deep-metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1100px) { .deep-metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .deep-metrics-grid { grid-template-columns: 1fr; } }
 
 .deep-metric-card {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: border-color 0.3s, transform 0.2s;
+  gap: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .deep-metric-card:hover {
-  border-color: rgba(108, 99, 255, 0.3);
-  transform: translateY(-2px);
+  border-color: var(--primary);
+  background: var(--bg-surface-2);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 .deep-metric-label {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
   font-weight: 700;
 }
 .deep-metric-value {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 900;
   color: var(--text-main);
+  letter-spacing: -0.02em;
 }
 .deep-metric-bar-track {
-  height: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
+  height: 6px;
+  background: var(--bg-surface-3);
+  border-radius: 3px;
   overflow: hidden;
 }
 .deep-metric-bar-fill {
   height: 100%;
-  border-radius: 2px;
-  transition: width 1s ease;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .deep-metric-desc {
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  line-height: 1.4;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.6;
 }
 
 /* Topic Heatmap */
@@ -699,21 +828,22 @@
 }
 .topic-heatmap th {
   text-align: left;
-  padding: 10px 12px;
-  color: var(--text-muted);
+  padding: 14px 16px;
+  color: var(--text-dim);
   font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   border-bottom: 1px solid var(--border-color);
 }
 .topic-heatmap td {
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
   color: var(--text-main);
+  font-size: 0.85rem;
 }
 .topic-heatmap tr:hover td {
-  background: rgba(108, 99, 255, 0.04);
+  background: var(--bg-surface-1);
 }
 .topic-heatmap-cell {
   display: inline-block;
@@ -745,11 +875,10 @@
   justify-content: flex-end;
 }
 .rhythm-bar {
-  width: 100%;
-  max-width: 32px;
-  border-radius: 4px 4px 0 0;
-  transition: height 0.8s ease;
-  min-height: 2px;
+  width: 28px;
+  border-radius: 6px 6px 2px 2px;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 4px;
 }
 .rhythm-bar-label {
   font-size: 0.6rem;
@@ -825,18 +954,23 @@
 .trend-chart {
   display: flex;
   align-items: flex-end;
-  gap: 3px;
-  height: 100px;
-  margin-top: 16px;
+  gap: 8px;
+  height: 160px;
+  margin-top: 24px;
   padding: 0 4px;
 }
 .trend-bar {
-  flex: 1;
-  border-radius: 3px 3px 0 0;
-  transition: height 0.6s ease;
-  min-height: 2px;
-  cursor: default;
+  width: 40px;
+  border-radius: 6px 6px 2px 2px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 4px;
+  cursor: pointer;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.trend-bar:hover {
+  filter: brightness(1.2) saturate(1.2);
+  transform: scaleY(1.02);
 }
 .trend-bar:hover::after {
   content: attr(data-score);

@@ -17,6 +17,7 @@ interface MLAnalysis {
     profile_name: string;
     description: string;
   };
+  aura_score?: number;
 }
 
 export default function AuraJourney() {
@@ -26,6 +27,7 @@ export default function AuraJourney() {
   const [mlData, setMlData] = useState<MLAnalysis | null>(null);
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"overview" | "mastery" | "forecast" | "analytics">("overview");
 
   // Topic Filtering for Skill Tree
   const [topicMap, setTopicMap] = useState<Record<string, string[]>>({});
@@ -149,16 +151,35 @@ export default function AuraJourney() {
           <p className="aura-subtitle">Gamified Behavioral Traits & Interactive Skill Trees</p>
         </div>
         <div className="aura-score-badge">
-          <Flame size={24} color="#f59e0b" className="animate-pulse" />
+          <div className="aura-score-icon-box">
+            <Flame size={24} color="var(--accent-amber)" />
+          </div>
           <div className="aura-score-content">
             <span className="aura-score-label">AURA SCORE</span>
-            <span className="aura-score-value">{auraScore}</span>
+            <span className="aura-score-value">{mlData?.aura_score || auraScore}</span>
           </div>
         </div>
       </div>
 
-      <div className="aura-grid">
-        {/* Behavioral Gamification Panel */}
+      <div className="aura-tabs">
+        <button className={`aura-tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+          <Activity size={16} /> Overview
+        </button>
+        <button className={`aura-tab-btn ${activeTab === 'mastery' ? 'active' : ''}`} onClick={() => setActiveTab('mastery')}>
+          <Target size={16} /> Mastery
+        </button>
+        <button className={`aura-tab-btn ${activeTab === 'forecast' ? 'active' : ''}`} onClick={() => setActiveTab('forecast')}>
+          <Compass size={16} /> Predict
+        </button>
+        <button className={`aura-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+          <LineChart size={16} /> Analytics
+        </button>
+      </div>
+
+      {activeTab === 'overview' && (
+        <>
+          <div className="aura-grid">
+            {/* Behavioral Gamification Panel */}
         <div className="aura-panel">
           <div className="aura-panel-header">
             <Brain size={18} color="var(--primary)" />
@@ -292,9 +313,13 @@ export default function AuraJourney() {
           </div>
         </div>
       )}
+        </>
+      )}
 
-      {/* Zone of Proximal Development (ZPD) Simulator */}
-      <div className="aura-panel zpd-panel">
+      {activeTab === 'forecast' && (
+        <>
+          {/* Zone of Proximal Development (ZPD) Simulator */}
+          <div className="aura-panel zpd-panel">
         <div className="aura-panel-header">
           <Compass size={18} color="var(--accent-purple)" />
           <h3>ZPD Simulator: Prescriptive Learning Path</h3>
@@ -447,25 +472,24 @@ export default function AuraJourney() {
           </motion.div>
         )}
       </div>
+        </>
+      )}
 
-      {/* Interactive Mastery Skill Tree */}
-      <div className="aura-panel skill-tree-panel">
-        <div className="aura-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {activeTab === 'mastery' && (
+        <>
+          {/* Interactive Mastery Skill Tree */}
+          <div className="aura-panel skill-tree-panel">
+        <div className="aura-panel-header skill-tree-header">
+          <div className="flex items-center gap-2">
             <Target size={18} color="var(--accent-emerald)" />
             <h3>Interactive Mastery Skill Tree</h3>
           </div>
           
           {/* Topic Filter Tabs */}
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+          <div className="skill-filter-tabs">
              <button 
                 onClick={() => setSelectedTopic("All")}
-                style={{
-                  padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer",
-                  background: selectedTopic === "All" ? "var(--accent)" : "rgba(255,255,255,0.05)",
-                  color: selectedTopic === "All" ? "#fff" : "var(--text-muted)",
-                  border: "none", transition: "all 0.2s"
-                }}
+                className={`skill-filter-btn ${selectedTopic === "All" ? "active" : ""}`}
              >
                 All
              </button>
@@ -473,12 +497,7 @@ export default function AuraJourney() {
                <button 
                  key={topic}
                  onClick={() => setSelectedTopic(topic)}
-                 style={{
-                   padding: "4px 12px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer",
-                   background: selectedTopic === topic ? "var(--accent)" : "rgba(255,255,255,0.05)",
-                   color: selectedTopic === topic ? "#fff" : "var(--text-muted)",
-                   border: "none", transition: "all 0.2s", whiteSpace: "nowrap"
-                 }}
+                 className={`skill-filter-btn ${selectedTopic === topic ? "active" : ""}`}
                >
                  {topic}
                </button>
@@ -555,12 +574,16 @@ export default function AuraJourney() {
           )}
         </div>
       </div>
+        </>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════
          DEEP ANALYTICS SECTIONS — Tier 3 Visualizations
          ══════════════════════════════════════════════════════════════ */}
 
-      {/* 1. Deep Analytics Dashboard — 8 metric cards */}
+      {activeTab === 'analytics' && (
+        <>
+          {/* 1. Deep Analytics Dashboard — 8 metric cards */}
       {aiInsights?.mlMetrics?.deepProfile && (() => {
         const dp = aiInsights.mlMetrics.deepProfile;
         const metrics = [
@@ -621,9 +644,13 @@ export default function AuraJourney() {
           )}
         </motion.div>
       )}
+        </>
+      )}
 
-      {/* 3. Topic Intelligence Matrix */}
-      {aiInsights?.mlMetrics?.topicMatrix?.topics && Object.keys(aiInsights.mlMetrics.topicMatrix.topics).length > 0 && (
+      {activeTab === 'mastery' && (
+        <>
+          {/* 3. Topic Intelligence Matrix */}
+          {aiInsights?.mlMetrics?.topicMatrix?.topics && Object.keys(aiInsights.mlMetrics.topicMatrix.topics).length > 0 && (
         <motion.div className="aura-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="aura-panel-header">
             <BarChart3 size={18} color="var(--accent-amber)" />
@@ -655,9 +682,13 @@ export default function AuraJourney() {
           </div>
         </motion.div>
       )}
+        </>
+      )}
 
-      <div className="aura-grid">
-        {/* 4. Learning Rhythm */}
+      {activeTab === 'analytics' && (
+        <>
+        <div className="aura-grid">
+          {/* 4. Learning Rhythm */}
         {aiInsights?.mlMetrics?.learningRhythm?.daily_volume && (
           <motion.div className="aura-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
             <div className="aura-panel-header">
@@ -743,9 +774,14 @@ export default function AuraJourney() {
             </div>
           </motion.div>
         )}
+      </div>
+        </>
+      )}
 
-        {/* 7. Progress Forecast */}
-        {aiInsights?.mlMetrics?.progressForecast?.projections?.length > 0 && (
+      {activeTab === 'forecast' && (
+        <div className="aura-grid">
+          {/* 7. Progress Forecast */}
+          {aiInsights?.mlMetrics?.progressForecast?.projections?.length > 0 && (
           <motion.div className="aura-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <div className="aura-panel-header">
               <TrendingUp size={18} color="var(--accent-emerald)" />
@@ -773,7 +809,8 @@ export default function AuraJourney() {
             </div>
           </motion.div>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
