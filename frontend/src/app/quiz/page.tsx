@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowRight, ArrowLeft, CheckCircle2, BookOpen, Lightbulb, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getCurrentQuiz, setQuizResults } from "@/lib/storage";
 
 interface QuestionBehavior {
   timeSpentMs: number;
@@ -27,9 +28,8 @@ export default function QuizInterface() {
   // Load quiz
   useEffect(() => {
     setTimeout(() => {
-      const stored = localStorage.getItem("current_quiz");
-      if (stored) {
-        const parsed = JSON.parse(stored);
+      const parsed = getCurrentQuiz();
+      if (parsed) {
         setQuiz(parsed);
         quizStartTimeRef.current = Date.now();
         setQuestionStartTime(Date.now());
@@ -126,19 +126,16 @@ export default function QuizInterface() {
 
       const totalTimeMs = Object.values(finalBehaviors).reduce((sum, b) => sum + b.timeSpentMs, 0);
 
-      localStorage.setItem(
-        "quiz_results",
-        JSON.stringify({
-          quiz: {
-            ...quiz,
-            timeSpentSeconds: Math.round(totalTimeMs / 1000),
-          },
-          answers: selectedAnswers,
-          questionBehaviors: finalBehaviors,
-          hintsRevealed,
-          totalTimeMs,
-        })
-      );
+      setQuizResults({
+        quiz: {
+          ...quiz,
+          timeSpentSeconds: Math.round(totalTimeMs / 1000),
+        },
+        answers: selectedAnswers,
+        questionBehaviors: finalBehaviors,
+        hintsRevealed,
+        totalTimeMs,
+      });
       router.push("/results");
     }
   };

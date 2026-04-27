@@ -4,6 +4,8 @@
    Real-time updates via custom "aura-storage" events.
    ══════════════════════════════════════════════════════ */
 
+import { BACKEND_URL } from "@/lib/config";
+
 // ── Types ──────────────────────────────────────────
 
 export interface QuizResult {
@@ -95,6 +97,8 @@ const BASE_KEYS = {
   BADGES: "aura_badges",
   DISMISSED_ALERTS: "aura_dismissed_alerts",
   LAST_VISIT: "aura_last_visit",
+  CURRENT_QUIZ: "aura_current_quiz",
+  QUIZ_RESULTS: "quiz_results",
 } as const;
 
 // Dynamic keys that use the current user ID
@@ -103,6 +107,8 @@ const KEYS = {
   get BADGES() { return userKey(BASE_KEYS.BADGES); },
   get DISMISSED_ALERTS() { return userKey(BASE_KEYS.DISMISSED_ALERTS); },
   get LAST_VISIT() { return userKey(BASE_KEYS.LAST_VISIT); },
+  get CURRENT_QUIZ() { return userKey(BASE_KEYS.CURRENT_QUIZ); },
+  get QUIZ_RESULTS() { return userKey(BASE_KEYS.QUIZ_RESULTS); },
 };
 
 const XP_PER_QUIZ_BASE = 25;
@@ -142,43 +148,105 @@ export function onStorageUpdate(callback: () => void): () => void {
   return () => window.removeEventListener(STORAGE_EVENT, callback);
 }
 
+// ── Current Quiz (in-progress session) ─────────────
+
+export function setCurrentQuiz(quiz: any) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEYS.CURRENT_QUIZ, JSON.stringify(quiz));
+}
+
+export function getCurrentQuiz(): any | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(KEYS.CURRENT_QUIZ);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+export function clearCurrentQuiz() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(KEYS.CURRENT_QUIZ);
+}
+
+// ── Quiz Results (temporary results for analysis) ──
+
+export function setQuizResults(data: any) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEYS.QUIZ_RESULTS, JSON.stringify(data));
+}
+
+export function getQuizResults(): any | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(KEYS.QUIZ_RESULTS);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
 // ── Quiz History ───────────────────────────────────
 
 export async function syncHistoryFromDB() {
   if (typeof window === "undefined") return;
-  try {
-    if (!_currentUserId) return;
+  if (!_currentUserId) return;
 
+  try {
     // Read local history before overwriting
     const rawLocal = localStorage.getItem(KEYS.QUIZ_HISTORY);
     const localHistory: QuizResult[] = rawLocal ? JSON.parse(rawLocal) : [];
 
-    const res = await fetch(`http://127.0.0.1:8000/api/history?user_id=${_currentUserId}`);
-    if (res.ok) {
-      let dbData = await res.json();
-      
-      // Auto-Migration: If local storage has quizzes but the DB is empty, push them to the DB!
-      if (localHistory.length > 0 && dbData.length === 0) {
-        console.log("Migrating local storage history to PostgreSQL...");
-        for (const quiz of localHistory) {
-          await fetch("http://127.0.0.1:8000/api/quizzes", {
+    // Fetch with timeout so a slow/dead backend doesn't block the UI
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    let res: Response;
+    try {
+      res = await fetch(`${BACKEND_URL}/api/history?user_id=${_currentUserId}`, {
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!res.ok) return;
+
+    let dbData: QuizResult[] = await res.json();
+
+    // Auto-Migration: push any local-only quizzes to the DB
+    const dbIds = new Set(dbData.map((q) => q.id));
+    const localOnly = localHistory.filter((q) => !dbIds.has(q.id));
+
+    if (localOnly.length > 0) {
+      console.log(`Migrating ${localOnly.length} local quizzes to PostgreSQL...`);
+      for (const quiz of localOnly) {
+        try {
+          await fetch(`${BACKEND_URL}/api/quizzes`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...quiz, userId: _currentUserId })
+            body: JSON.stringify({ ...quiz, userId: _currentUserId }),
           });
-        }
-        // Fetch again to get the canonical DB state after migration
-        const updatedRes = await fetch(`http://127.0.0.1:8000/api/history?user_id=${_currentUserId}`);
-        if (updatedRes.ok) {
-          dbData = await updatedRes.json();
+        } catch {
+          // Individual quiz migration failure is non-fatal
         }
       }
-
-      localStorage.setItem(KEYS.QUIZ_HISTORY, JSON.stringify(dbData));
-      emitStorageUpdate();
+      // Refresh canonical state from DB after migration
+      try {
+        const updatedRes = await fetch(`${BACKEND_URL}/api/history?user_id=${_currentUserId}`);
+        if (updatedRes.ok) dbData = await updatedRes.json();
+      } catch {
+        // Refresh failed — use what we had
+      }
     }
+
+    // Merge: DB is the source of truth, but keep any local records not yet synced
+    const finalIds = new Set(dbData.map((q) => q.id));
+    const unsynced = localHistory.filter((q) => !finalIds.has(q.id));
+    const merged = [...dbData, ...unsynced];
+
+    localStorage.setItem(KEYS.QUIZ_HISTORY, JSON.stringify(merged));
+    emitStorageUpdate();
   } catch (err) {
-    console.error("Failed to sync history from DB:", err);
+    // Network failure (offline, backend down, timeout) — keep using local data
+    console.warn("Backend sync unavailable, using local data:", err);
   }
 }
 
@@ -211,12 +279,17 @@ export function saveQuizResult(result: Omit<QuizResult, "id" | "userId">): QuizR
   history.unshift(entry); // newest first
   localStorage.setItem(KEYS.QUIZ_HISTORY, JSON.stringify(history));
 
-  // Sync to backend DB asynchronously
-  fetch("http://127.0.0.1:8000/api/quizzes", {
+  // Sync to backend DB asynchronously (non-blocking, with timeout)
+  const syncController = new AbortController();
+  const syncTimeout = setTimeout(() => syncController.abort(), 5000);
+  fetch(`${BACKEND_URL}/api/quizzes`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(entry)
-  }).catch(err => console.error("Failed to save to DB", err));
+    body: JSON.stringify(entry),
+    signal: syncController.signal,
+  })
+    .catch(() => {}) // Silently fail — data is safe in localStorage and will sync on next login
+    .finally(() => clearTimeout(syncTimeout));
 
   // Award XP
   awardXP(entry);
@@ -457,6 +530,67 @@ function checkAndUnlockBadges(history: QuizResult[], latest: QuizResult) {
   // Night owl
   const hour = new Date(latest.timestamp).getHours();
   if (hour >= 0 && hour < 5) unlock("night_owl");
+
+  localStorage.setItem(KEYS.BADGES, JSON.stringify(badges));
+}
+
+/**
+ * Retroactively evaluates all badges against the full quiz history.
+ * Called after syncHistoryFromDB() so that badges rebuild on a new device.
+ */
+export function recomputeBadgesFromHistory() {
+  const history = getQuizHistory();
+  if (history.length === 0) return;
+
+  const badges: Badge[] = JSON.parse(JSON.stringify(BADGE_DEFINITIONS)); // fresh copy
+  const now = Date.now();
+
+  const unlock = (id: string) => {
+    const b = badges.find((b) => b.id === id);
+    if (b && !b.unlockedAt) b.unlockedAt = now;
+  };
+
+  // First quiz
+  if (history.length >= 1) unlock("first_quiz");
+
+  // Perfect score — check ALL history
+  if (history.some((q) => q.score === 100)) unlock("perfect_score");
+
+  // Quiz count milestones
+  if (history.length >= 5) unlock("quizzes_5");
+  if (history.length >= 10) unlock("quizzes_10");
+  if (history.length >= 25) unlock("quizzes_25");
+
+  // Streak
+  const { current } = calculateStreak(history);
+  if (current >= 3) unlock("streak_3");
+  if (current >= 7) unlock("streak_7");
+
+  // XP milestones
+  const xp = getStoredXP();
+  if (xp >= 500) unlock("xp_500");
+  if (xp >= 1000) unlock("xp_1000");
+
+  // Speed demon — check ALL history
+  if (history.some((q) => q.timeSpentSeconds < 60 && q.totalQuestions >= 3))
+    unlock("speed_demon");
+
+  // Well rounded - 5 different topics across ALL history
+  const uniqueTopics = new Set(history.map((q) => q.topic.toLowerCase()));
+  if (uniqueTopics.size >= 5) unlock("well_rounded");
+
+  // Night owl — check ALL history
+  if (history.some((q) => {
+    const h = new Date(q.timestamp).getHours();
+    return h >= 0 && h < 5;
+  })) unlock("night_owl");
+
+  // Merge: preserve any existing unlock timestamps, only add new unlocks
+  const existing = getBadges();
+  for (const badge of badges) {
+    const prev = existing.find((e) => e.id === badge.id);
+    if (prev?.unlockedAt) badge.unlockedAt = prev.unlockedAt;
+  }
 
   localStorage.setItem(KEYS.BADGES, JSON.stringify(badges));
 }

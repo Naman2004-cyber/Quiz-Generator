@@ -5,6 +5,7 @@ import { getQuizHistory, getUserStats, UserStats, QuizResult, getXPAndLevel, get
 import { useAuth } from "@/contexts/AuthContext";
 import { Flame, Brain, Activity, Zap, TrendingUp, TrendingDown, Target, HelpCircle, Trophy, Compass, Play, ChevronRight, CheckCircle2, RefreshCw, Sparkles, BarChart3, Clock, Users, Cpu, LineChart, ArrowUpRight, ArrowDownRight, Minus, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
+import { BACKEND_URL } from "@/lib/config";
 import "./aura.css";
 
 interface MLAnalysis {
@@ -320,7 +321,7 @@ export default function AuraJourney() {
               if (!zpdTopic || !history.length) return;
               setIsSimulating(true);
               setZpdResult(null);
-              fetch("http://127.0.0.1:8000/api/zpd-simulate", {
+              fetch(`${BACKEND_URL}/api/zpd-simulate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ history, topic: zpdTopic })

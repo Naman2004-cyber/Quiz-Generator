@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Zap, BrainCircuit, Activity, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { getQuizHistory } from "@/lib/storage";
+import { getQuizHistory, setCurrentQuiz } from "@/lib/storage";
+import { BACKEND_URL } from "@/lib/config";
 
 const GENERATION_STEPS = [
   "Initializing learning matrix...",
@@ -44,7 +45,7 @@ export default function GenerateQuiz() {
       try {
         const history = getQuizHistory();
         if (history.length > 0) {
-          const res = await fetch("http://127.0.0.1:8000/api/next-quiz", {
+          const res = await fetch(`${BACKEND_URL}/api/next-quiz`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ history: history })
@@ -82,7 +83,7 @@ export default function GenerateQuiz() {
       }
 
       const data = await res.json();
-      localStorage.setItem("current_quiz", JSON.stringify(data.quiz));
+      setCurrentQuiz(data.quiz);
       router.push("/quiz");
     } catch (error: any) {
       console.error(error);

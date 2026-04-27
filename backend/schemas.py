@@ -41,7 +41,6 @@ class Recommendation(BaseModel):
     concept: str
     reason: str
     difficulty: Optional[str] = "Medium"
-    difficulty: Optional[str] = "Medium"
 
 class ClusterInfo(BaseModel):
     cluster_id: int

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SERVER_BACKEND_URL } from "@/lib/config";
 
 export async function POST(req: Request) {
   try {
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
       }
     );
 
-    const mlPromise = fetch("http://127.0.0.1:8000/api/analyze", {
+    const mlPromise = fetch(`${SERVER_BACKEND_URL}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ history: quizHistory || [] }),
@@ -78,40 +79,40 @@ export async function POST(req: Request) {
     const histBody = JSON.stringify({ history: quizHistory || [] });
     const mlHeaders = { "Content-Type": "application/json" };
 
-    const trendPromise = fetch("http://127.0.0.1:8000/api/trend", {
+    const trendPromise = fetch(`${SERVER_BACKEND_URL}/api/trend`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const clusterPromise = fetch("http://127.0.0.1:8000/api/explain-cluster", {
+    const clusterPromise = fetch(`${SERVER_BACKEND_URL}/api/explain-cluster`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const nextQuizPromise = fetch("http://127.0.0.1:8000/api/next-quiz", {
+    const nextQuizPromise = fetch(`${SERVER_BACKEND_URL}/api/next-quiz`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
     // Deep Analytics Tier 2 endpoints
-    const deepProfilePromise = fetch("http://127.0.0.1:8000/api/deep-profile", {
+    const deepProfilePromise = fetch(`${SERVER_BACKEND_URL}/api/deep-profile`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const topicMatrixPromise = fetch("http://127.0.0.1:8000/api/topic-matrix", {
+    const topicMatrixPromise = fetch(`${SERVER_BACKEND_URL}/api/topic-matrix`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const learningRhythmPromise = fetch("http://127.0.0.1:8000/api/learning-rhythm", {
+    const learningRhythmPromise = fetch(`${SERVER_BACKEND_URL}/api/learning-rhythm`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const comparativePromise = fetch("http://127.0.0.1:8000/api/comparative-stats", {
+    const comparativePromise = fetch(`${SERVER_BACKEND_URL}/api/comparative-stats`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 
-    const featureImpPromise = fetch("http://127.0.0.1:8000/api/feature-importance", {
+    const featureImpPromise = fetch(`${SERVER_BACKEND_URL}/api/feature-importance`, {
       method: "GET", headers: mlHeaders,
     }).catch(() => null);
 
-    const forecastPromise = fetch("http://127.0.0.1:8000/api/progress-forecast", {
+    const forecastPromise = fetch(`${SERVER_BACKEND_URL}/api/progress-forecast`, {
       method: "POST", headers: mlHeaders, body: histBody,
     }).catch(() => null);
 

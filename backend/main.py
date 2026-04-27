@@ -49,9 +49,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Aura Learn ML Backend", description="Production ML Pipeline for Aura Learn", lifespan=lifespan)
 
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

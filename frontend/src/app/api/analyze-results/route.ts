@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SERVER_BACKEND_URL } from "@/lib/config";
 
 export async function POST(req: Request) {
   try {
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
       }),
     });
 
-    const mlPromise = fetch("http://127.0.0.1:8000/api/analyze", {
+    const mlPromise = fetch(`${SERVER_BACKEND_URL}/api/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ history: history || [] }),
@@ -71,15 +72,15 @@ export async function POST(req: Request) {
       return null;
     });
 
-    const trendPromise = fetch("http://127.0.0.1:8000/api/trend", {
+    const trendPromise = fetch(`${SERVER_BACKEND_URL}/api/trend`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history: history || [] }),
     }).catch(() => null);
 
-    const clusterPromise = fetch("http://127.0.0.1:8000/api/explain-cluster", {
+    const clusterPromise = fetch(`${SERVER_BACKEND_URL}/api/explain-cluster`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history: history || [] }),
     }).catch(() => null);
 
-    const nextQuizPromise = fetch("http://127.0.0.1:8000/api/next-quiz", {
+    const nextQuizPromise = fetch(`${SERVER_BACKEND_URL}/api/next-quiz`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history: history || [] }),
     }).catch(() => null);
 

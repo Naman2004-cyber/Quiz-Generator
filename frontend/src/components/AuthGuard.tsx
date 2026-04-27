@@ -9,7 +9,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { syncHistoryFromDB } from "@/lib/storage";
+import { syncHistoryFromDB, recomputeBadgesFromHistory } from "@/lib/storage";
 
 const PUBLIC_ROUTES = ["/login", "/signup"];
 
@@ -28,7 +28,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user && !isPublicRoute) {
-      syncHistoryFromDB();
+      // Sync history from PostgreSQL, then rebuild badges from the synced data
+      syncHistoryFromDB().then(() => {
+        recomputeBadgesFromHistory();
+      });
     }
   }, [user, isPublicRoute]);
 

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Target, Zap, AlertTriangle, Activity, ExternalLink, BookOpen, CheckCircle2, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { saveQuizResult, updateQuizAnalysis, getQuizHistory } from "@/lib/storage";
+import { saveQuizResult, updateQuizAnalysis, getQuizHistory, getQuizResults } from "@/lib/storage";
 
 const ANALYSIS_STEPS = [
   "Ingesting evaluation responses...",
@@ -33,10 +33,8 @@ export default function ResultsAndAnalysis() {
 
   useEffect(() => {
     const runAnalysis = async () => {
-      const stored = localStorage.getItem("quiz_results");
-      if (!stored) return;
-      
-      const parsedData = JSON.parse(stored);
+      const parsedData = getQuizResults();
+      if (!parsedData) return;
       setResultsData(parsedData);
 
       // ── Save quiz result to dashboard storage ──
