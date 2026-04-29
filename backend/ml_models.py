@@ -317,18 +317,32 @@ class QuizMLAnalyzer:
             "Medium": {"time_mult": 1.0, "hint_mult": 1.0, "change_mult": 1.0},
             "Hard":   {"time_mult": 1.5, "hint_mult": 2.0, "change_mult": 1.8},
         }
+        df_hist = pd.DataFrame(history) if history else pd.DataFrame([{"score": 50}])
+        avg_score = float(df_hist['score'].mean()) if 'score' in df_hist.columns else 50.0
+
         for diff in ["Easy", "Medium", "Hard"]:
             profile = diff_profiles[diff]
             dummy_next = last_history.copy() if last_history else {}
-            dummy_next['id'] = "hypothetical_next"
+            dummy_next['id'] = last_history.get('id', 'current_user')
             dummy_next['timestamp'] = last_history.get('timestamp', 0) + 86400000
             dummy_next['difficulty'] = diff
             dummy_next['topic'] = weakest_concept
+            
+            # Create a heuristic expected score to blend with ML output to ensure realistic spread
+            if diff == "Easy":
+                score_est = min(100.0, avg_score * 1.25 + 10.0)
+            elif diff == "Hard":
+                score_est = max(0.0, avg_score * 0.7 - 8.0)
+            else:
+                score_est = avg_score
+                
             # Scale behavioral features by difficulty
             avg_total_q = max(int(last_history.get('totalQuestions', 5)), 1)
             base_time = float(last_history.get('timeSpentSeconds', avg_total_q * 30))
             base_hints_pq = float(last_history.get('hintsPerQuestion', 0))
             base_changes = int(last_history.get('answerChanges', 0))
+            
+            dummy_next['score'] = score_est
             dummy_next['timeSpentSeconds'] = int(base_time * profile["time_mult"])
             dummy_next['hintsPerQuestion'] = base_hints_pq * profile["hint_mult"]
             dummy_next['hintsUsed'] = base_hints_pq * profile["hint_mult"] * avg_total_q
@@ -342,11 +356,12 @@ class QuizMLAnalyzer:
             next_quiz_features = forecast_df.iloc[-1:]
             scaled_feature_cols = [f"{c}_scaled" for c in self._feature_cols]
             
-            rf_pred = self.rf_model.predict(next_quiz_features[scaled_feature_cols])[0]
-            gb_pred = self.gb_model.predict(next_quiz_features[scaled_feature_cols])[0]
+            rf_pred = float(self.rf_model.predict(next_quiz_features[scaled_feature_cols])[0])
+            gb_pred = float(self.gb_model.predict(next_quiz_features[scaled_feature_cols])[0])
             
             ensemble_score = 0.6 * rf_pred + 0.4 * gb_pred
-            simulations[diff] = min(100.0, max(0.0, ensemble_score))
+            blended_score = (ensemble_score * 0.5) + (score_est * 0.5)
+            simulations[diff] = round(min(100.0, max(0.0, blended_score)), 1)
             
             # Distance from perfect ZPD target of 78%
             dist = abs(simulations[diff] - 78.0)
@@ -459,7 +474,8 @@ class QuizMLAnalyzer:
             current_mastery = sum(q.get("score", 0) for q in history) / len(history)
 
         # Compute student behavioral averages for realistic simulation
-        df_hist = pd.DataFrame(history)
+        hist_for_avg = topic_history if topic_history else history
+        df_hist = pd.DataFrame(hist_for_avg)
         avg_score = float(df_hist['score'].mean()) if 'score' in df_hist.columns else 50
         avg_total_q = int(df_hist['totalQuestions'].mean()) if 'totalQuestions' in df_hist.columns else 10
         avg_correct = float(df_hist['correctAnswers'].mean()) if 'correctAnswers' in df_hist.columns else 5
@@ -531,7 +547,9 @@ class QuizMLAnalyzer:
                 gb_pred = float(self.gb_model.predict(next_quiz_row[scaled_cols])[0])
                 
                 ensemble_score = 0.6 * rf_pred + 0.4 * gb_pred
-                predictions[diff] = round(min(100.0, max(0.0, ensemble_score)), 1)
+                # Blend with profile score_est to prevent flat predictions at extreme outliers
+                blended_score = (ensemble_score * 0.5) + (profile["score_est"] * 0.5)
+                predictions[diff] = round(min(100.0, max(0.0, blended_score)), 1)
             except Exception as e:
                 logger.error(f"ZPD sim error for {diff}: {e}")
                 predictions[diff] = round(profile["score_est"], 1)

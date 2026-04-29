@@ -155,7 +155,9 @@ export default function LoginPage() {
       router.push("/");
     } catch (err: any) {
       const code = err?.code || "";
-      if (code === "auth/popup-closed-by-user") return;
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        return;
+      }
       if (code === "auth/account-exists-with-different-credential") {
         setError("An account already exists with this email using a different sign-in method.");
       } else {
