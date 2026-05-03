@@ -144,10 +144,10 @@
 
 .dash-stat-card:hover::before { opacity: 1; }
 
-.dash-stat-card:nth-child(1):hover { border-color: rgba(124, 106, 255, 0.2); }
-.dash-stat-card:nth-child(2):hover { border-color: rgba(0, 212, 170, 0.2); }
-.dash-stat-card:nth-child(3):hover { border-color: rgba(245, 158, 11, 0.2); }
-.dash-stat-card:nth-child(4):hover { border-color: rgba(244, 114, 182, 0.2); }
+.dash-stat-card:nth-child(1):hover { border-color: var(--primary); }
+.dash-stat-card:nth-child(2):hover { border-color: var(--accent-emerald); }
+.dash-stat-card:nth-child(3):hover { border-color: var(--accent-amber); }
+.dash-stat-card:nth-child(4):hover { border-color: var(--accent-rose); }
 
 .dash-stat-icon {
   width: 42px;

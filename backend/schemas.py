@@ -82,3 +82,24 @@ class AnalysisResponse(BaseModel):
     behavioral_strengths: Optional[List[str]] = []
     behavioral_weaknesses: Optional[List[str]] = []
     suggestions: Optional[List[Dict[str, str]]] = []
+
+
+# ── Leaderboard Schemas ────────────────────────────────
+class LeaderboardSubmit(BaseModel):
+    user_id: str
+    display_name: str
+    aura_score: int = 0
+    cluster_id: int = -1
+    profile_name: str = "Unranked"
+    total_quizzes: int = 0
+    avg_accuracy: float = 0.0
+
+class LeaderboardEntry(BaseModel):
+    user_id: str
+    display_name: str
+    aura_score: int
+    cluster_id: int
+    profile_name: str
+    total_quizzes: int
+    avg_accuracy: float
+    rank: int = 0

@@ -24,27 +24,31 @@
   --text-dim: #5A5A7A;
 
   /* ── Brand ── */
-  --primary: #7C6AFF;
-  --primary-dark: #5B4ACF;
-  --primary-glow: rgba(124, 106, 255, 0.15);
+  --primary: #6366F1; /* Slate Indigo */
+  --primary-dark: #4F46E5;
+  --primary-glow: rgba(99, 102, 241, 0.15);
 
   /* ── Accents ── */
-  --accent-emerald: #00D4AA;
-  --accent-emerald-glow: rgba(0, 212, 170, 0.12);
-  --accent-amber: #F59E0B;
-  --accent-amber-glow: rgba(245, 158, 11, 0.12);
-  --accent-rose: #F472B6;
-  --accent-rose-glow: rgba(244, 114, 182, 0.12);
+  --accent-emerald: #38BDF8; /* Sky/Cyan Blue */
+  --accent-emerald-glow: rgba(56, 189, 248, 0.12);
+  --accent-amber: #10B981; /* Emerald/Mint Green */
+  --accent-amber-glow: rgba(16, 185, 129, 0.12);
+  --accent-rose: #A78BFA; /* Lavender/Mauve Purple */
+  --accent-rose-glow: rgba(167, 139, 250, 0.12);
 
   /* ── Legacy compat ── */
-  --primary-start: #7C6AFF;
-  --primary-end: #5B4ACF;
-  --accent: #00D4AA;
+  --primary-start: #6366F1;
+  --primary-end: #4F46E5;
+  --accent: #38BDF8;
 
   /* ── Semantic ── */
-  --success: #34D399;
+  --success: #10B981;
   --warning: #F59E0B;
-  --danger: #FB7185;
+  --danger: #EF4444;
+
+  --chart-high: #10B981; /* Premium Mint Green */
+  --chart-mid: #38BDF8; /* Premium Sky Blue */
+  --chart-low: #6366F1; /* Premium Indigo */
 
   /* ── Layout ── */
   --sidebar-width: 260px;

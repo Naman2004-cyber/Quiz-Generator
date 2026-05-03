@@ -99,6 +99,26 @@ export default function AuraJourney() {
         if (data.success) {
            setMlData(data.insights.mlMetrics || null);
            setAiInsights(data.insights);
+
+           // Auto-submit to leaderboard (fire-and-forget)
+           const finalAura = data.insights.mlMetrics?.aura_score || calculatedAura;
+           const clusterId = data.insights.mlMetrics?.learning_profile?.cluster_id ?? -1;
+           const profileName = data.insights.mlMetrics?.learning_profile?.profile_name ?? "Unranked";
+           if (user?.uid) {
+             fetch(`${BACKEND_URL}/api/leaderboard/submit`, {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                 user_id: user.uid,
+                 display_name: user.displayName || "Anonymous",
+                 aura_score: finalAura,
+                 cluster_id: clusterId,
+                 profile_name: profileName,
+                 total_quizzes: s?.totalQuizzes || 0,
+                 avg_accuracy: s?.averageAccuracy || 0,
+               }),
+             }).catch(() => {}); // Non-blocking
+           }
         }
         setLoading(false);
       })
@@ -415,7 +435,7 @@ export default function AuraJourney() {
             <div className="zpd-predictions">
               {zpdResult.predictions && Object.entries(zpdResult.predictions).map(([diff, score]: [string, any]) => {
                 const isOptimal = diff === zpdResult.optimal_difficulty;
-                const barColor = diff === "Easy" ? "var(--accent-emerald)" : diff === "Medium" ? "var(--accent-amber)" : "var(--accent-rose)";
+                const barColor = diff === "Easy" ? "#10B981" : diff === "Medium" ? "#38BDF8" : "#8B5CF6";
                 return (
                   <div key={diff} className={`zpd-prediction-card ${isOptimal ? 'optimal' : ''}`}>
                     <div className="zpd-prediction-header">
@@ -630,7 +650,7 @@ export default function AuraJourney() {
           <p className="aura-profile-desc">Your score history across all quizzes. Hover for exact values.</p>
           <div className="trend-chart">
             {[...history].reverse().map((q, i) => {
-              const color = q.score >= 80 ? 'var(--accent-emerald)' : q.score >= 50 ? 'var(--accent-amber)' : 'var(--accent-rose)';
+              const color = q.score >= 80 ? 'var(--chart-high)' : q.score >= 50 ? 'var(--chart-mid)' : 'var(--chart-low)';
               return <div key={i} className="trend-bar" data-score={`${q.score}% — ${q.topic}`} style={{ height: `${q.score}%`, background: color }} />;
             })}
           </div>

@@ -8,15 +8,16 @@ import uvicorn
 import pandas as pd
 import numpy as np
 
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from database import engine, Base, get_db
-from db_models import QuizResultDB
+from db_models import QuizResultDB, LeaderboardEntryDB
 
 from schemas import (
     AnalysisRequest, AnalysisResponse, TrainRequest, 
-    TrendResponse, ClusterExplanationResponse, NextQuizResponse, TrendDataPoint, QuizRecord
+    TrendResponse, ClusterExplanationResponse, NextQuizResponse, TrendDataPoint, QuizRecord,
+    LeaderboardSubmit, LeaderboardEntry
 )
 from ml_models import analyzer_instance, logger
 from seed_data import generate_synthetic_data, generate_for_user_context
@@ -372,6 +373,65 @@ def get_progress_forecast(request: AnalysisRequest):
     except Exception as e:
         logger.error(f"Progress forecast error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Progress forecast failed")
+
+# ══════════════════════════════════════════════════════════════
+# LEADERBOARD ENDPOINTS
+# ══════════════════════════════════════════════════════════════
+
+import time
+
+@app.post("/api/leaderboard/submit")
+def submit_leaderboard(entry: LeaderboardSubmit, db: Session = Depends(get_db)):
+    """Upsert a user's leaderboard entry. Called automatically when /aura loads."""
+    try:
+        existing = db.query(LeaderboardEntryDB).filter(LeaderboardEntryDB.user_id == entry.user_id).first()
+        if existing:
+            existing.display_name = entry.display_name
+            existing.aura_score = entry.aura_score
+            existing.cluster_id = entry.cluster_id
+            existing.profile_name = entry.profile_name
+            existing.total_quizzes = entry.total_quizzes
+            existing.avg_accuracy = entry.avg_accuracy
+            existing.updated_at = int(time.time() * 1000)
+        else:
+            db_entry = LeaderboardEntryDB(
+                user_id=entry.user_id,
+                display_name=entry.display_name,
+                aura_score=entry.aura_score,
+                cluster_id=entry.cluster_id,
+                profile_name=entry.profile_name,
+                total_quizzes=entry.total_quizzes,
+                avg_accuracy=entry.avg_accuracy,
+                updated_at=int(time.time() * 1000),
+            )
+            db.add(db_entry)
+        db.commit()
+        return {"status": "ok"}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Leaderboard submit error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/leaderboard", response_model=List[LeaderboardEntry])
+def get_leaderboard(cluster_id: Optional[int] = None, db: Session = Depends(get_db)):
+    """Return ranked leaderboard entries, optionally filtered by cluster."""
+    query = db.query(LeaderboardEntryDB)
+    if cluster_id is not None and cluster_id >= 0:
+        query = query.filter(LeaderboardEntryDB.cluster_id == cluster_id)
+    entries = query.order_by(LeaderboardEntryDB.aura_score.desc()).all()
+    result = []
+    for rank, e in enumerate(entries, 1):
+        result.append(LeaderboardEntry(
+            user_id=e.user_id,
+            display_name=e.display_name,
+            aura_score=e.aura_score,
+            cluster_id=e.cluster_id,
+            profile_name=e.profile_name,
+            total_quizzes=e.total_quizzes,
+            avg_accuracy=e.avg_accuracy,
+            rank=rank,
+        ))
+    return result
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

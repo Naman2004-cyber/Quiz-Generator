@@ -135,6 +135,8 @@ def generate_synthetic_data(n_samples: int = 250) -> list[dict]:
             
             record = {
                 "id": f"synthetic_{student_idx}_{quiz_idx}",
+                "student_id": f"synthetic_{student_idx}",
+                "userId": f"synthetic_{student_idx}",
                 "topic": topic,
                 "title": f"{topic} Assessment",
                 "score": actual_score,

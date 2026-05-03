@@ -60,7 +60,12 @@ class QuizMLAnalyzer:
             
         if 'id' not in df.columns:
             df['id'] = 'current_user'
-        df['student_id'] = df['id'].apply(lambda x: self._get_student_id(x))
+            
+        if 'student_id' not in df.columns:
+            if 'userId' in df.columns:
+                df['student_id'] = df['userId']
+            else:
+                df['student_id'] = df['id'].apply(lambda x: self._get_student_id(x))
         
         # Base features
         if 'correctAnswers' in df.columns and 'totalQuestions' in df.columns:
@@ -148,6 +153,7 @@ class QuizMLAnalyzer:
 
         df = pd.DataFrame(data)
         if 'timestamp' in df.columns:
+            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
             df = df.sort_values('timestamp').reset_index(drop=True)
             
         # Temporal Split (80/20)

@@ -25,3 +25,16 @@ class QuizResultDB(Base):
     answer_changes = Column(Integer, default=0)
     avg_time_per_question_sec = Column(Float, default=0.0)
     per_question_data = Column(JSON, nullable=True)
+
+
+class LeaderboardEntryDB(Base):
+    __tablename__ = "leaderboard_entries"
+
+    user_id = Column(String, primary_key=True, index=True)
+    display_name = Column(String, nullable=False)
+    aura_score = Column(Integer, default=0)
+    cluster_id = Column(Integer, default=-1)
+    profile_name = Column(String, default="Unranked")
+    total_quizzes = Column(Integer, default=0)
+    avg_accuracy = Column(Float, default=0.0)
+    updated_at = Column(BigInteger)
