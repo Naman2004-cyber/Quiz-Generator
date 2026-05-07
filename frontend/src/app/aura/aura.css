@@ -1087,3 +1087,110 @@
   gap: 8px;
 }
 
+/* Deep Metrics Hover Tooltips */
+.deep-metric-label-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.deep-metric-tooltip-container {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+  line-height: 1;
+}
+
+.deep-metric-info-icon {
+  color: var(--text-muted);
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.deep-metric-tooltip-container:hover .deep-metric-info-icon {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.deep-metric-tooltip-content {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  width: 320px;
+  background: #0b0914; /* Pure solid dark background to prevent any background text overlap */
+  border: 1px solid rgba(124, 106, 255, 0.4); /* Glowing purple border */
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 16px rgba(124, 106, 255, 0.1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  text-transform: none; /* Reset metric label upper-casing */
+  font-weight: normal;
+  text-align: left;
+}
+
+.deep-metric-tooltip-container:hover .deep-metric-tooltip-content {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip Content Typography */
+.tooltip-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffffff; /* Ultra clear white */
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.tooltip-desc {
+  font-size: 0.78rem;
+  color: #94a3b8; /* Crisp silver-slate grey */
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.tooltip-details {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tooltip-detail-item {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.tooltip-label {
+  font-weight: 700;
+  color: #64748b; /* Medium slate grey for label */
+  margin-right: 4px;
+}
+
+.tooltip-code {
+  font-family: 'Fira Code', Consolas, Monaco, monospace;
+  color: #38bdf8; /* High-contrast Sky Blue for the mathematical formula */
+  background: rgba(56, 189, 248, 0.12); /* Semi-transparent blue backdrop */
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  word-break: break-all;
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.tooltip-scale-val {
+  color: #34d399; /* Vibrant mint green for scale */
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+
+

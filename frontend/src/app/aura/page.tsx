@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getQuizHistory, getUserStats, UserStats, QuizResult, getXPAndLevel, getSkillMap } from "@/lib/storage";
 import { useAuth } from "@/contexts/AuthContext";
-import { Flame, Brain, Activity, Zap, TrendingUp, TrendingDown, Target, HelpCircle, Trophy, Compass, Play, ChevronRight, CheckCircle2, RefreshCw, Sparkles, BarChart3, Clock, Users, Cpu, LineChart, ArrowUpRight, ArrowDownRight, Minus, Calendar } from "lucide-react";
+import { Info, Flame, Brain, Activity, Zap, TrendingUp, TrendingDown, Target, HelpCircle, Trophy, Compass, Play, ChevronRight, CheckCircle2, RefreshCw, Sparkles, BarChart3, Clock, Users, Cpu, LineChart, ArrowUpRight, ArrowDownRight, Minus, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { BACKEND_URL } from "@/lib/config";
 import "./aura.css";
@@ -606,14 +606,14 @@ export default function AuraJourney() {
       {aiInsights?.mlMetrics?.deepProfile && (() => {
         const dp = aiInsights.mlMetrics.deepProfile;
         const metrics = [
-          { label: "Cognitive Load", value: dp.cognitive_load_index, max: 1, color: "var(--accent-amber)", desc: "How hard the material feels" },
-          { label: "Speed × Accuracy", value: dp.speed_accuracy_tradeoff, max: 5, color: "var(--accent-emerald)", desc: "Efficiency of understanding" },
-          { label: "Engagement", value: dp.engagement_score, max: 100, color: "var(--primary)", desc: "Frequency × consistency × time", suffix: "%" },
-          { label: "Topic Consistency", value: dp.topic_consistency, max: 100, color: "var(--accent-purple)", desc: "Cross-topic score stability", suffix: "%" },
-          { label: "Mastery Velocity", value: dp.mastery_velocity, max: 10, color: dp.mastery_velocity >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Learning speed (pts/quiz)" },
-          { label: "Difficulty Stretch", value: dp.difficulty_stretch_rate, max: 1, color: "var(--accent-amber)", desc: "Hard score ÷ Easy score" },
-          { label: "Recovery Rate", value: dp.recovery_rate, max: 50, color: "var(--accent-emerald)", desc: "Avg bounce-back after a bad quiz" },
-          { label: "Streak Momentum", value: dp.streak_momentum, max: 20, color: dp.streak_momentum >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Weighted recent score trajectory" },
+          { label: "Cognitive Load", value: dp.cognitive_load_index, max: 1, color: "var(--accent-amber)", desc: "How hard the material feels", formula: "(HintsUsed * 0.4) + (AvgPacingTime * 0.3) + (ErrorRate * 0.3)", scale: "0.00 to 1.00 (Lower is better)" },
+          { label: "Speed × Accuracy", value: dp.speed_accuracy_tradeoff, max: 5, color: "var(--accent-emerald)", desc: "Efficiency of understanding", formula: "Accuracy * (50 - AvgTimeSpentPerQuestion)", scale: "0.00 to 5.00 (Higher is better)" },
+          { label: "Engagement", value: dp.engagement_score, max: 100, color: "var(--primary)", desc: "Frequency × consistency × time", suffix: "%", formula: "SessionsCount * StreakConsistencyMultiplier", scale: "0% to 100% (Higher is better)" },
+          { label: "Topic Consistency", value: dp.topic_consistency, max: 100, color: "var(--accent-purple)", desc: "Cross-topic score stability", suffix: "%", formula: "100 * (1.0 - StdDev(TopicScores))", scale: "0% to 100% (Higher is better)" },
+          { label: "Mastery Velocity", value: dp.mastery_velocity, max: 10, color: dp.mastery_velocity >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Learning speed (pts/quiz)", formula: "LinearRegressionSlope(RecentScores)", scale: "-10.0 to +10.0 (Positive is better)" },
+          { label: "Difficulty Stretch", value: dp.difficulty_stretch_rate, max: 1, color: "var(--accent-amber)", desc: "Hard score ÷ Easy score", formula: "AvgHardScore / AvgEasyScore", scale: "0.00 to 1.00 (Higher is better)" },
+          { label: "Recovery Rate", value: dp.recovery_rate, max: 50, color: "var(--accent-emerald)", desc: "Avg bounce-back after a bad quiz", formula: "Mean(ScoreDifference[Quiz_N - Quiz_N-1]) where Quiz_N-1 < 50%", scale: "0.00 to 50.00 (Higher is better)" },
+          { label: "Streak Momentum", value: dp.streak_momentum, max: 20, color: dp.streak_momentum >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Weighted recent score trajectory", formula: "WeightedMovingAverage(Scores)", scale: "0.00 to 20.00 (Higher is better)" },
         ];
         return (
           <motion.div className="aura-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -625,7 +625,20 @@ export default function AuraJourney() {
             <div className="deep-metrics-grid">
               {metrics.map((m, i) => (
                 <motion.div key={m.label} className="deep-metric-card" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.05 * i }}>
-                  <div className="deep-metric-label">{m.label}</div>
+                  <div className="deep-metric-label-wrapper">
+                    <div className="deep-metric-label">{m.label}</div>
+                    <div className="deep-metric-tooltip-container">
+                      <Info size={13} className="deep-metric-info-icon" />
+                      <div className="deep-metric-tooltip-content">
+                        <div className="tooltip-title">{m.label}</div>
+                        <div className="tooltip-desc">{m.desc}</div>
+                        <div className="tooltip-details">
+                          <div className="tooltip-detail-item"><strong className="tooltip-label">Formula:</strong> <code className="tooltip-code">{m.formula}</code></div>
+                          <div className="tooltip-detail-item"><strong className="tooltip-label">Scale:</strong> <span className="tooltip-scale-val">{m.scale}</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div className="deep-metric-value" style={{ color: m.color }}>
                     {typeof m.value === 'number' ? (m.value > 10 ? Math.round(m.value) : m.value.toFixed(2)) : m.value}{m.suffix || ''}
                   </div>
