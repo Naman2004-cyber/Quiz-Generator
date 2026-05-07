@@ -607,13 +607,13 @@ export default function AuraJourney() {
         const dp = aiInsights.mlMetrics.deepProfile;
         const metrics = [
           { label: "Cognitive Load", value: dp.cognitive_load_index, max: 1, color: "var(--accent-amber)", desc: "How hard the material feels", formula: "(HintsUsed * 0.4) + (AvgPacingTime * 0.3) + (ErrorRate * 0.3)", scale: "0.00 to 1.00 (Lower is better)" },
-          { label: "Speed × Accuracy", value: dp.speed_accuracy_tradeoff, max: 5, color: "var(--accent-emerald)", desc: "Efficiency of understanding", formula: "Accuracy * (50 - AvgTimeSpentPerQuestion)", scale: "0.00 to 5.00 (Higher is better)" },
+          { label: "Speed × Accuracy", value: dp.speed_accuracy_tradeoff, max: 10, color: "var(--accent-emerald)", desc: "Efficiency of understanding", formula: "Accuracy / (AvgTimePerQuestion / 60.0)", scale: "0.00 to 10.00+ (Higher is better)" },
           { label: "Engagement", value: dp.engagement_score, max: 100, color: "var(--primary)", desc: "Frequency × consistency × time", suffix: "%", formula: "SessionsCount * StreakConsistencyMultiplier", scale: "0% to 100% (Higher is better)" },
-          { label: "Topic Consistency", value: dp.topic_consistency, max: 100, color: "var(--accent-purple)", desc: "Cross-topic score stability", suffix: "%", formula: "100 * (1.0 - StdDev(TopicScores))", scale: "0% to 100% (Higher is better)" },
+          { label: "Topic Consistency", value: dp.topic_consistency, max: 100, color: "var(--accent-rose)", desc: "Cross-topic score stability", suffix: "%", formula: "100 * (1.0 - StdDev(TopicScores))", scale: "0% to 100% (Higher is better)" },
           { label: "Mastery Velocity", value: dp.mastery_velocity, max: 10, color: dp.mastery_velocity >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Learning speed (pts/quiz)", formula: "LinearRegressionSlope(RecentScores)", scale: "-10.0 to +10.0 (Positive is better)" },
           { label: "Difficulty Stretch", value: dp.difficulty_stretch_rate, max: 1, color: "var(--accent-amber)", desc: "Hard score ÷ Easy score", formula: "AvgHardScore / AvgEasyScore", scale: "0.00 to 1.00 (Higher is better)" },
           { label: "Recovery Rate", value: dp.recovery_rate, max: 50, color: "var(--accent-emerald)", desc: "Avg bounce-back after a bad quiz", formula: "Mean(ScoreDifference[Quiz_N - Quiz_N-1]) where Quiz_N-1 < 50%", scale: "0.00 to 50.00 (Higher is better)" },
-          { label: "Streak Momentum", value: dp.streak_momentum, max: 20, color: dp.streak_momentum >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Weighted recent score trajectory", formula: "WeightedMovingAverage(Scores)", scale: "0.00 to 20.00 (Higher is better)" },
+          { label: "Streak Momentum", value: dp.streak_momentum, max: 50, color: dp.streak_momentum >= 0 ? "var(--accent-emerald)" : "var(--accent-rose)", desc: "Weighted recent score trajectory", formula: "Sum((Score_N - Score_N-1) * (1 / N))", scale: "-50.00 to +50.00 (Positive is better)" },
         ];
         return (
           <motion.div className="aura-panel" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
